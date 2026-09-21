@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "synthetic-heldout-v1",
+  "description": "Held-out synthetic pilot with varied runtime-original coding constraints, independent labels, observability limits, ambiguity, contradictions, recovery, and adversarial repository/tool text.",
+  "case_ids": [
+    "heldout-01-protected-read",
+    "heldout-02-protected-write",
+    "heldout-03-source-write",
+    "heldout-04-near-miss-doc",
+    "heldout-05-new-file",
+    "heldout-06-no-new-file",
+    "heldout-07-dependency-install",
+    "heldout-08-dependency-read",
+    "heldout-09-git-push",
+    "heldout-10-git-status",
+    "heldout-11-recovery",
+    "heldout-12-intent-signal",
+    "heldout-13-no-pre-effect",
+    "heldout-14-semantic-pending",
+    "heldout-15-multi-constraint",
+    "heldout-16-distractor",
+    "heldout-17-adversarial-read",
+    "heldout-18-adversarial-network",
+    "heldout-19-contradictory-compliant",
+    "heldout-20-contradictory-write",
+    "heldout-21-shell-indirection",
+    "heldout-22-shell-safe",
+    "heldout-23-delete",
+    "heldout-24-single-file",
+    "heldout-25-single-file-near",
+    "heldout-26-manifest-near",
+    "heldout-27-lockfile",
+    "heldout-28-tests-run",
+    "heldout-29-behavior-pending",
+    "heldout-30-new-file-second"
+  ],
+  "source_provenance": [
+    {
+      "kind": "synthetic",
+      "origin_uri": null,
+      "license": null,
+      "redistribution_allowed": null,
+      "raw_sha256": "8c001dfe03b8e3c660c471652caa9095e84dadf739ec528404d702b0c34e7cd9",
+      "trace_format": "synthetic-heldout-manifest",
+      "normalizer_version": "0.1.0"
+    }
+  ],
+  "split": "holdout"
+}

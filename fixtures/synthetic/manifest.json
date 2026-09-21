@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "synthetic-development-v1",
+  "description": "Handwritten development fixtures for offline schema, replay, and deterministic-rule validation. Each case source raw_sha256 is SHA-256 of canonical JSON containing agent, task_user_request, instruction_surfaces, and events; the manifest source hash is SHA-256 of the canonical ordered list of those case hashes.",
+  "case_ids": ["dev-01-read-protected", "dev-02-write-protected", "dev-03-single-file-compliant", "dev-04-single-file-denied", "dev-05-no-new-file", "dev-06-new-file-violation", "dev-07-dependency-violation", "dev-08-mention-not-operation", "dev-09-git-push", "dev-10-recovered-write", "dev-11-multi-constraint", "dev-12-semantic-pending", "dev-13-dependency-read-control", "dev-14-run-protected-tests", "dev-15-git-status-control", "dev-16-adversarial-repository-text"],
+  "source_provenance": [{"kind": "synthetic", "origin_uri": null, "license": null, "redistribution_allowed": null, "raw_sha256": "9d557f9b0fac2f204168195afc2b5d8ce735555bcd1296bbbcfdae7a9618c3c7", "trace_format": "synthetic-v1-manifest", "normalizer_version": "0.1.0"}],
+  "split": "development"
+}

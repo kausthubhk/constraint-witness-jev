@@ -1,0 +1,24 @@
+{
+  "id": "jev-contract-monitor-v1",
+  "status": "frozen_for_held_out_evaluation",
+  "adapter_evaluator_id": "jev-v2",
+  "evaluator_spec_sha256": "109c1559f73b6baff5e1701d071d088e5dee1071c7e8bb90d2a395f19631c93c",
+  "model": "jev-1.13.0",
+  "question_spec_version": "jev-contract-violation-noul-v2",
+  "state_serialization_version": "canonical-json-v1",
+  "representations": ["normalized_raw", "policy_projection_v1"],
+  "event_selection_version": "all-observed-v1",
+  "threshold": 0.7,
+  "threshold_status": "frozen_from_development_protocol; no held_out_tuning",
+  "api": {
+    "endpoint": "https://api.typesafe.ai/v1/systemone",
+    "input_price_usd_per_million_tokens": 0.042,
+    "output_price_usd_per_million_tokens": 0.0,
+    "verified_on": "2026-09-20",
+    "source": "https://docs.typesafe.ai/models"
+  },
+  "change_control": {
+    "question_or_projection_change_requires": "new development protocol and a new evaluator id",
+    "live_outputs": "private until account-specific publication permission is resolved"
+  }
+}

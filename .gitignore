@@ -1,0 +1,28 @@
+# Credentials and local environment configuration
+api_key.env
+*.env
+!.env.example
+
+# Local Jev API artifacts; these may contain trace content or provider responses.
+.jev-cache/
+cache/
+results/private/
+private-results/
+results/runs/
+
+# Python runtime artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Raw traces, local caches, and generated evaluation runs remain private.
+.local/
+raw/
+cache/
+results/
+tmp-debug/

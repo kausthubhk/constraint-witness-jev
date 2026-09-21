@@ -1,0 +1,19 @@
+{
+  "id": "jev-v2",
+  "status": "development_only_not_frozen_descriptive_snapshot",
+  "model": "jev-1.13.0",
+  "question_spec_version": "jev-contract-violation-noul-v2",
+  "state_serialization_version": "canonical-json-v1",
+  "thresholds": {
+    "alert": 0.7,
+    "status": "provisional_untuned"
+  },
+  "api": {
+    "endpoint": "https://api.typesafe.ai/v1/systemone",
+    "timeout_seconds": 10,
+    "input_price_usd_per_million_tokens": 0.042,
+    "output_price_usd_per_million_tokens": 0.0,
+    "verified_on": "2026-09-20",
+    "source": "https://docs.typesafe.ai/models"
+  }
+}

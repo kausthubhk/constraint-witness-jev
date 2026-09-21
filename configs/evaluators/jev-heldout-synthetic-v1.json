@@ -1,0 +1,14 @@
+{
+  "id": "jev-heldout-synthetic-v1",
+  "status": "heldout_pending_live_evaluation",
+  "dataset": "fixtures/heldout",
+  "development_smoke_config": "configs/evaluators/jev-development-smoke-v1.json",
+  "representations": ["normalized_raw", "policy_projection_v1"],
+  "event_selection_version": "all-observed-v1",
+  "primary_denominator_exclusions": ["ungradeable", "unknown", "ambiguous"],
+  "minimum_case_count": 30,
+  "expected_prefixes": 31,
+  "expected_prefix_evaluations": 62,
+  "coverage": ["compliant", "near_miss", "recovery", "ambiguity", "multiple_constraints", "distracting_events", "contradictory_instructions", "adversarial_repo_tool_text", "no_pre_effect_warning", "intent_signal"],
+  "evaluator_spec_sha256": "109c1559f73b6baff5e1701d071d088e5dee1071c7e8bb90d2a395f19631c93c"
+}

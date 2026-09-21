@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0",
+  "description": "Small synthetic multi-event cases reserved for independent human annotation of semantic and evidence-boundary judgments. Labels are intentionally absent.",
+  "dataset_id": "synthetic-semantic-development-v1",
+  "case_ids": ["semdev-01-backward-compatibility-violated", "semdev-02-backward-compatibility-preserved", "semdev-03-removed-behavior-intent", "semdev-04-refactor-preserves-behavior", "semdev-05-public-api", "semdev-06-incomplete-evidence"],
+  "source_provenance": [{"kind": "synthetic", "origin_uri": null, "license": null, "redistribution_allowed": null, "raw_sha256": "5502804fc3dc14787cbc6bd752db67c16377c945a9283ff180bb9596ff31abba", "trace_format": "semantic-development-v1-manifest", "normalizer_version": "0.1.0"}],
+  "split": "development"
+}
