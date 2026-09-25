@@ -20,7 +20,7 @@ The primary specification is [`jev_coding_contract_eval_FINAL_HANDOVER.md`](../j
 
 ## Verified state
 
-The offline implementation is available for local verification. The previously recorded test and evaluator-run claims are historical and should not be treated as a current verification result; re-run the repository verification gate before relying on them. The six semantic-development cases are annotation-ready but remain ungradeable until independently labeled. CI has not run remotely. The repository has no commits or remote; all project files are currently untracked.
+The offline implementation is available for local verification. The previously recorded test and evaluator-run claims are historical and should not be treated as a current verification result; re-run the repository verification gate before relying on them. The six semantic-development cases are annotation-ready but remain ungradeable until independently labeled. CI has not run remotely. The repository has commits and an `origin` remote; the working tree was clean at the time of this verification.
 
 No live Jev calls were made after the previously authorized connectivity preflight. No public or controlled traces have been published or added. No API key file was read.
 
