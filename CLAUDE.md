@@ -147,4 +147,4 @@ At each human decision checkpoint, provide a concise handoff with:
 
 Keep a durable progress record so the work can resume without repeating completed phases.
 
-Begin with Phase 1 now. Do not restart the completed protocol audit or blinding-design reasoning unless current repository evidence demonstrates material drift.
+Begin from the repository's current checkpoint. Do not restart completed Phase 1–3 work, the protocol audit, or blinding-design reasoning unless current repository evidence demonstrates material drift.

@@ -145,7 +145,7 @@ The CLI may use different names, but must support these operations:
 
 Live evaluation should print a budget preflight and distinguish Jev API cost from scarce Codex session budget. Normal replay/report commands must never require a key or make network calls.
 
-The current offline CLI includes `validate`, `inspect`, `sanitize`, `release-check`, `annotate`, `import`, `plan-run`, `eval`, and `report`. Jev cache-only evaluation uses `eval --evaluator jev-v2 --cache-dir`; live access requires explicit `--live`. The standalone ingestion, sanitization, annotation, cache, and reporting modules are usable without provider access. Final CLI regression remains an integration gate until the current hybrid report fixture is repaired.
+The current offline CLI includes `validate`, `inspect`, `sanitize`, `release-check`, `annotate`, `import`, `plan-run`, `eval`, and `report`. Jev cache-only evaluation uses `eval --evaluator jev-v2 --cache-dir`; live access requires explicit `--live`. The standalone ingestion, sanitization, annotation, cache, and reporting modules are usable without provider access. The hybrid evaluation and report flow is covered by the CLI regression suite.
 
 ## Repository shape
 
