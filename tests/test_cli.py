@@ -4,13 +4,18 @@ import shutil
 import time
 from pathlib import Path
 
+import pytest
+
+import contract_eval.cli as cli
 from contract_eval.canonical import canonical_sha256
 from contract_eval.cli import main
+from contract_eval.jev import TransportResponse
 from contract_eval.replay import evaluator_state_sha256
 from contract_eval.schema import Case
 
 FIXTURES = Path(__file__).parents[1] / "fixtures" / "synthetic"
 HELDOUT_FIXTURES = Path(__file__).parents[1] / "fixtures" / "heldout"
+SEMANTIC_DEVELOPMENT_FIXTURES = Path(__file__).parents[1] / "fixtures" / "semantic-development-v1"
 
 
 def test_validate_development_fixtures(capsys):
@@ -59,6 +64,164 @@ def test_jev_cli_is_cache_only_and_reports_offline_misses(tmp_path):
         )
         == 0
     )
+
+
+def test_jev_plan_and_eval_block_v2_required_prefixes_without_provider_calls(
+    tmp_path, monkeypatch, capsys
+):
+    class UnexpectedTransport:
+        def __init__(self):
+            self.calls = 0
+
+        def post_json(self, url, headers, payload, timeout_seconds):
+            self.calls += 1
+            raise AssertionError("V2-required fixtures must not reach the provider")
+
+    transport = UnexpectedTransport()
+    monkeypatch.setattr(cli, "UrllibTransport", lambda: transport)
+    cache_dir = tmp_path / "cache"
+    output = tmp_path / "jev.jsonl"
+    config = Path(__file__).parents[1] / "configs" / "evaluators" / "jev-contract-monitor-v1.json"
+
+    assert (
+        main(
+            [
+                "plan-run",
+                str(SEMANTIC_DEVELOPMENT_FIXTURES),
+                "--evaluator",
+                "jev-v2",
+                "--representation",
+                "normalized_raw",
+                "--jev-config",
+                str(config),
+                "--cache",
+                str(cache_dir),
+            ]
+        )
+        == 0
+    )
+    plan = json.loads(capsys.readouterr().out)
+    assert plan["prefixes"] == 24
+    assert plan["eligible_prefixes"] == 0
+    assert plan["blocked_prefixes"] == 24
+    assert plan["blocked_prefix_reasons"] == {"representation_requires_new_evaluator_protocol": 24}
+    assert plan["potential_calls"] == plan["live_calls_after_cache"] == 0
+
+    assert (
+        main(
+            [
+                "eval",
+                str(SEMANTIC_DEVELOPMENT_FIXTURES),
+                "--evaluator",
+                "jev-v2",
+                "--representation",
+                "normalized_raw",
+                "--jev-config",
+                str(config),
+                "--cache-dir",
+                str(cache_dir),
+                "--out",
+                str(output),
+                "--live",
+            ]
+        )
+        == 0
+    )
+    rows = [json.loads(line) for line in output.read_text(encoding="utf-8").splitlines()]
+    assert transport.calls == 0
+    assert len(rows) == 24
+    assert {row["skip_reason"] for row in rows} == {
+        "representation_requires_new_evaluator_protocol"
+    }
+
+
+def test_jev_plan_does_not_count_cache_hits_for_a_frozen_incompatible_representation(
+    tmp_path, monkeypatch, capsys
+):
+    case_path = FIXTURES / "dev-12-semantic-pending.json"
+    case = Case.model_validate_json(case_path.read_text(encoding="utf-8"))
+    constraints = tuple({"id": item.id, "text": item.verbatim} for item in case.constraints)
+    cache_dir = tmp_path / "cache"
+    cache_dir.mkdir()
+    key = cli.cache_key_for_request(
+        cli.evaluator_state(case, 1, "normalized_raw"),
+        constraints,
+        evaluator_spec_hash="test-frozen-hash",
+    )
+    (cache_dir / f"{key}.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(
+        cli,
+        "load_frozen_config",
+        lambda path: {
+            "representations": ["policy_projection_v1"],
+            "evaluator_spec_sha256": "test-frozen-hash",
+        },
+    )
+
+    assert cli.plan_run(case_path, "jev-v2", cache_dir, "normalized_raw") == 0
+    plan = json.loads(capsys.readouterr().out)
+    assert plan["cache_hits"] == 0
+    assert plan["eligible_prefixes"] == 0
+    assert plan["potential_calls"] == plan["live_calls_after_cache"] == 0
+    assert plan["blocked_prefix_reasons"] == {
+        "representation_requires_new_evaluator_protocol": len(case.events)
+    }
+
+
+@pytest.mark.parametrize(
+    ("response", "error_text"),
+    [
+        (TransportResponse(status=503, body={}), "Jev HTTP request failed (status=503)"),
+        (
+            TransportResponse(
+                status=200,
+                body={
+                    "model": "jev-1.13.0",
+                    "answers": {},
+                    "usage": {"input_tokens": 1, "output_tokens": 1},
+                },
+            ),
+            "Jev response validation failed",
+        ),
+    ],
+)
+def test_live_jev_stops_on_first_provider_or_schema_failure(
+    tmp_path, monkeypatch, capsys, response, error_text
+):
+    class FailingTransport:
+        def __init__(self):
+            self.calls = 0
+
+        def post_json(self, url, headers, payload, timeout_seconds):
+            self.calls += 1
+            return response
+
+    transport = FailingTransport()
+    monkeypatch.setattr(cli, "UrllibTransport", lambda: transport)
+    monkeypatch.setenv("TYPESAFE_API_KEY", "test-key")
+    output = tmp_path / "jev.jsonl"
+    case = FIXTURES / "dev-12-semantic-pending.json"
+
+    assert (
+        main(
+            [
+                "eval",
+                str(case),
+                "--evaluator",
+                "jev-v2",
+                "--cache-dir",
+                str(tmp_path / "empty-cache"),
+                "--out",
+                str(output),
+                "--live",
+            ]
+        )
+        == 2
+    )
+    assert transport.calls == 1
+    assert error_text in capsys.readouterr().out
+    assert not output.exists()
+    assert not output.with_suffix(output.suffix + ".manifest.json").exists()
 
 
 def test_heldout_fixture_oracles_and_intent_labels_match_observable_evidence():

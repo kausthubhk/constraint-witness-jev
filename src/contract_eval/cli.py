@@ -607,10 +607,32 @@ def plan_run(
     prefixes = sum(len(case.events) for _, case in cases)
     eligible_prefixes = prefixes
     is_jev = evaluator in {"jev-v1", "jev-v2", "hybrid-v1"}
+    blocked_prefixes = 0
+    blocked_prefix_reasons: dict[str, int] = {}
+    frozen_hash = None
+    representation_compatible = True
+    if evaluator == "jev-v2":
+        frozen = load_frozen_config(
+            jev_config or Path("configs/evaluators/jev-contract-monitor-v1.json")
+        )
+        frozen_hash = str(frozen["evaluator_spec_sha256"])
+        representation_compatible = representation in frozen["representations"]
+        if not representation_compatible:
+            blocked_prefixes = prefixes
+            blocked_prefix_reasons["representation_requires_new_evaluator_protocol"] = prefixes
+        else:
+            blocked_prefixes = sum(
+                len(case.events) for _, case in cases if requires_v2_representation(case)
+            )
+            if blocked_prefixes:
+                blocked_prefix_reasons["representation_requires_new_evaluator_protocol"] = (
+                    blocked_prefixes
+                )
+        eligible_prefixes = prefixes - blocked_prefixes
     # Jev evaluates all typed questions over one state in a single request.
     # Each prefix is therefore one possible API call, regardless of the
     # number of constraints carried by that case.
-    potential_calls = prefixes if is_jev else 0
+    potential_calls = eligible_prefixes if is_jev else 0
     cache_hits = 0
     cache_supported = is_jev
     if cache_supported and cache is not None and cache.exists():
@@ -627,10 +649,13 @@ def plan_run(
                 cache_keys = set(cached)
             else:
                 raise ValueError("cache index must be a JSON object or list of string keys")
-        frozen_hash = None
-        if jev_config is not None:
+        if frozen_hash is None and jev_config is not None:
             frozen_hash = str(load_frozen_config(jev_config)["evaluator_spec_sha256"])
         for _, case in cases:
+            if evaluator == "jev-v2" and (
+                not representation_compatible or requires_v2_representation(case)
+            ):
+                continue
             for event in case.events:
                 state = evaluator_state(case, event.seq, representation)
                 constraints = tuple({"id": c.id, "text": c.verbatim} for c in case.constraints)
@@ -647,6 +672,8 @@ def plan_run(
         "constraints": units,
         "prefixes": prefixes,
         "eligible_prefixes": eligible_prefixes,
+        "blocked_prefixes": blocked_prefixes,
+        "blocked_prefix_reasons": blocked_prefix_reasons,
         "potential_calls": potential_calls,
         "cache_supported": cache_supported,
         "cache_hits": cache_hits,
@@ -975,6 +1002,10 @@ def eval_jev(
                             None,
                         )
                 except JevError:
+                    if live:
+                        # A live provider or schema failure invalidates the run.  Do not
+                        # spend the remaining request budget or write a partial artifact.
+                        raise
                     operational["error_code"] = "jev_evaluation_failed"
                     operational["cache_key"] = request_cache_key
                     operational["call_id"] = request_cache_key
@@ -1394,7 +1425,7 @@ def main(argv: list[str] | None = None) -> int:
             return report_from_cases(
                 args.run, args.cases, args.out_dir, args.annotations, args.dataset_quality
             )
-    except (OSError, ValueError, TypeError) as exc:
+    except (OSError, ValueError, TypeError, JevError) as exc:
         print(f"error: {exc}")
         return 2
     return 2
